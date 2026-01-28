@@ -1,0 +1,19 @@
+title: Suspicious Execution via Windows Command Shell
+id: 55b8ea01-9da6-4b8c-91ee-97de14a55df0
+status: experimental
+description: Detects suspicious PowerShell spawning cmd.exe with environment variable expansion
+author: Busra Ugur
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 1
+    Image|endswith: '\cmd.exe'
+    CommandLine|contains|all:
+      - '/c'
+      - '%LOCALAPPDATA%'
+  condition: selection
+falsepositives:
+  - Legitimate administrative scripts
+level: medium
