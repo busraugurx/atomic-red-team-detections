@@ -1,34 +1,32 @@
-title: PowerShell Spawning Obfuscated CMD via Environment Variable Expansion
-id: 55b8ea01-9da6-4b8c-91ee-97de14a55df0
+title: Fileless PowerShell Execution via Registry Base64 Payload
+id: 9f3b1a42-6c4f-4a61-9f0d-2c7c4e7b1e91
 status: experimental
 description: >
-  Detects PowerShell launching cmd.exe with environment variable expansion
-  and chained command execution using /c. This technique is commonly used
-  to obfuscate command execution, evade simple command-line detections,
-  and is frequently observed in living-off-the-land and fileless attack
-  scenarios related to MITRE ATT&CK T1059.003.
+  Detects PowerShell executing a Base64-encoded payload retrieved from
+  the Windows Registry and executed via Invoke-Expression (IEX),
+  a common fileless malware technique observed in T1059.001.
 references:
-  - https://attack.mitre.org/techniques/T1059/003/
+  - https://attack.mitre.org/techniques/T1059/001/
   - https://github.com/redcanaryco/atomic-red-team
 author: Busra Ugur
-date: 2026/01/28
+date: 2026/01/26
 logsource:
   product: windows
   category: process_creation
 detection:
   selection:
-    Image|endswith: '\cmd.exe'
-    ParentImage|endswith: '\powershell.exe'
+    Image|endswith: '\powershell.exe'
     CommandLine|contains|all:
-      - '/c'
-      - '%LOCALAPPDATA'
+      - 'FromBase64String'
+      - 'Invoke-Expression'
+      - 'Get-ItemProperty'
+      - 'HKCU:\Software\'
   condition: selection
 falsepositives:
-  - Legitimate administrative scripts using environment variables
-  - Automation or deployment tooling invoking cmd.exe via PowerShell
+  - Legitimate administrative scripts storing encoded data in registry
   - Red team simulations or atomic testing
 level: medium
 tags:
   - attack.execution
-  - attack.t1059.003
+  - attack.t1059.001
   - attack.defense_evasion
