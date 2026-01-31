@@ -1,0 +1,37 @@
+title: JavaScript Execution via cscript.exe launched from cmd.exe (T1059.007)
+id: b8e7a4f1-1059-007-cscript-cmd
+status: experimental
+author: Busra Ugur
+date: 2026-01-31
+description: |
+  Detects JavaScript execution via Windows Script Host (cscript.exe)
+  where the script is launched from cmd.exe, a common execution
+  pattern observed in scripted attack chains and Atomic Red Team tests.
+
+references:
+  - https://attack.mitre.org/techniques/T1059/007/
+
+logsource:
+  product: windows
+  category: process_creation
+
+detection:
+  selection_child:
+    Image|endswith: '\cscript.exe'
+    CommandLine|contains: '.js'
+
+  selection_parent:
+    ParentImage|endswith: '\cmd.exe'
+
+  condition: selection_child and selection_parent
+
+falsepositives:
+  - Administrative batch scripts invoking JavaScript
+  - Software installers using Windows Script Host
+
+level: medium
+
+tags:
+  - attack.execution
+  - attack.t1059.007
+  - attack.lolbin
